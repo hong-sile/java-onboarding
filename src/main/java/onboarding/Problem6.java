@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import onboarding.validatechecker.Problem6ValidateChecker;
@@ -18,13 +17,12 @@ public class Problem6 {
 	public static List<String> solution(List<List<String>> forms) {
 		//ProblemTest코드 실행 시 유효성 검사를 위한 validateChecker클래스
 		//Problem6ValidateChecker.isFormsValidate(forms);
-		Map<String,String> nickEmailMapper = genNickEmailMapper(forms);
 		List<String> nickNameList = genNickNameList(forms);
 		List<String> patternList = genPatternList(nickNameList);
 
-		Set<String> duplicatePatternSet = genDuplicatePatternSet(patternList);
+		List<String> duplicatePatternList = genDuplicatePatternList(patternList);
 		List<String> duplicatePatternEmailList =
-			genDuplicatePatternEmailList(duplicatePatternSet,nickEmailMapper,nickNameList);
+			genDuplicatePatternEmailList(duplicatePatternList,forms,nickNameList);
 
 		Collections.sort(duplicatePatternEmailList);
 
@@ -35,19 +33,27 @@ public class Problem6 {
 	pattern(길이가 2인 연속된 부분문자열)이 nickName이 포함되어 있는지 확인하고,
 	포함되어 있다면, map에서 nickName을 key로 조회해, email을 반환하고, 이를 리스트에 담아 반환한다.
 	*/
-	private static List<String> genDuplicatePatternEmailList(Set<String> duplicatePatternSet,
-		Map<String,String> nickEmailMapper, List<String> nickNameList) {
+	private static List<String> genDuplicatePatternEmailList(List<String> duplicatePatternList,
+		List<List<String>> forms, List<String> nickNameList) {
+		List<String> duplicatePatternNickNameList = new ArrayList<>();
 		List<String> duplicatePatternEmailList = new ArrayList<>();
-		for (String duplicatePattern : duplicatePatternSet) {
-			duplicatePatternEmailList.addAll(nickNameList.stream().filter(str -> str.contains(duplicatePattern))
-				.map(nickEmailMapper::get).collect(Collectors.toList()));
+
+		for (String duplicatePattern : duplicatePatternList) {
+			duplicatePatternNickNameList.addAll
+				(nickNameList.stream().filter(str -> str.contains(duplicatePattern)).collect(Collectors.toList()));
 		}
+
+		for(List<String> form : forms)
+			for(String nickName : duplicatePatternNickNameList)
+				if(form.contains(nickName))
+					duplicatePatternEmailList.add(form.get(EMAIL));
+
 		return duplicatePatternEmailList;
 	}
 
-	private static Set<String> genDuplicatePatternSet(List<String> patternList) {
+	private static List<String> genDuplicatePatternList(List<String> patternList) {
 		return patternList.stream().filter(str -> Collections.frequency(patternList, str) > UNDUPLICATED)
-			.collect(Collectors.toSet());
+			.distinct().collect(Collectors.toList());
 	}
 
 	//pattern(길이가 2인 연속된 부분문자열)의 종류를 list로 반환해주는 메소드
@@ -67,12 +73,5 @@ public class Problem6 {
 		for (List<String> user : forms)
 			nickNameList.add(user.get(NICKNAME));
 		return nickNameList;
-	}
-
-	private static Map<String,String> genNickEmailMapper(List<List<String>> forms) {
-		Map<String,String> nickEmailMapper = new HashMap<>();
-		for (List<String> user : forms)
-			nickEmailMapper.put(user.get(NICKNAME),user.get(EMAIL));
-		return nickEmailMapper;
 	}
 }
