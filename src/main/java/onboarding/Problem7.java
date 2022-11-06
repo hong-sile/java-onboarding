@@ -2,7 +2,6 @@ package onboarding;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +44,11 @@ public class Problem7 {
 
 	private static List<String> sortScoreMapByValue(Map<String, Integer> friendScoreMap) {
 		return friendScoreMap.entrySet().stream()
-			.sorted(Comparator.comparing(Map.Entry<String,Integer>::getValue).reversed())
+			.sorted((friendScore1,friendScore2) -> {
+				if(friendScore1.getValue().equals(friendScore2.getValue()))
+					return friendScore1.getKey().compareTo(friendScore2.getKey());
+				return friendScore2.getValue()-friendScore1.getValue();
+			})
 			.filter(user -> user.getValue() != INIT_SCORE).map(Map.Entry::getKey)
 			.collect(Collectors.toList());
 	}
